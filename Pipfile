@@ -23,11 +23,15 @@ django-celery-beat = "==2.6.0"
 redis = "==5.0.3"
 celery = "==5.3.6"
 flower = "==2.0.1"
+flake8 = "*"
 
 [dev-packages]
 psycopg2-binary = "==2.9.9"
 watchfiles = "==0.21.0"
 black = "==24.3.0"
+pytest = "*"
+pytest-django = "==4.10"
+flake8 = "*"
 
 [requires]
 python_version = "3.12"

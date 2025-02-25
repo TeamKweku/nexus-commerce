@@ -3,7 +3,6 @@ from os import getenv, path
 from dotenv import load_dotenv
 
 from .base import *  # noqa
-
 from .base import BASE_DIR
 
 # Local env directory for development purposes only.
@@ -37,9 +36,7 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(name)-12s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
-        }
+        "verbose": {"format": "%(levelname)s %(name)-12s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"}
     },
     "handlers": {
         "console": {

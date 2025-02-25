@@ -3,3 +3,5 @@
 psycopg2-binary==2.9.9
 watchfiles==0.21.0
 black==24.3.0
+pytest==8.3.4
+pytest-django==4.10.0
