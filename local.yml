@@ -52,7 +52,7 @@ services:
 
 networks:
   nexuscommerce_nw:
-    external: true
+    
 
 volumes:
   nexuscommerce_postgres_data: {}
