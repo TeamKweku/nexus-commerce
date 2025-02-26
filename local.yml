@@ -1,0 +1,59 @@
+services:
+  api: &api
+    build:
+      context: .
+      dockerfile: ./docker/local/django/Dockerfile
+    image: nexuscommerce_api
+    container_name: nexuscommerce_api
+    volumes:
+      - .:/app:z
+      - ./staticfiles:/app/staticfiles
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.envs/.env.local
+    depends_on:
+      - postgres
+      - mailpit
+    command: /start
+    networks:
+      - nexuscommerce_nw
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./docker/local/postgres/Dockerfile
+    image: nexuscommerce_postgres
+    container_name: nexuscommerce_postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - nexuscommerce_postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./.envs/.env.local
+    networks:
+      - nexuscommerce_nw 
+  
+  mailpit:
+    image: docker.io/axllent/mailpit:v1.22
+    container_name: nexuscommerce_mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    volumes:  
+      - nexuscommerce_mailpit_data:/data
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATA_FILE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1  
+    networks:
+      - nexuscommerce_nw
+
+networks:
+  nexuscommerce_nw:
+    external: true
+
+volumes:
+  nexuscommerce_postgres_data: {}
+  nexuscommerce_mailpit_data: {}
