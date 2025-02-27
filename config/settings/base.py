@@ -332,3 +332,11 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
 ]
 # Additional user data fields to fetch from Google
 SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ["first_name", "last_name"]
+
+# Define authentication backends for the application
+AUTHENTICATION_BACKENDS = (
+    # Enable Google OAuth2 authentication using social-auth-app-django
+    "social_core.backends.google.GoogleOAuth2",
+    # Django's default authentication backend for username/password auth
+    "django.contrib.auth.backends.ModelBackend",
+)

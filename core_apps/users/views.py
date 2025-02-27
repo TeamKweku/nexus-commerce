@@ -102,7 +102,30 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         tags=["Authentication"],
     )
     def post(self, request: Request, *args, **kwargs) -> Response:
-        return super().post(request, *args, **kwargs)
+        token_res = super().post(request, *args, **kwargs)
+
+        if token_res.status_code == status.HTTP_200_OK:
+            access_token = token_res.data.get("access")
+            refresh_token = token_res.data.get("refresh")
+
+            if access_token and refresh_token:
+                set_auth_cookies(
+                    token_res,
+                    access_token=access_token,
+                    refresh_token=refresh_token,
+                )
+
+                token_res.data.pop("access", None)
+                token_res.data.pop("refresh", None)
+
+                token_res.data["message"] = "Login Successful"  # Removed period
+            else:
+                token_res.data["message"] = "Login Failed"
+                logger.error(
+                    "Access or refresh token not found in login response data"
+                )
+
+        return token_res
 
 
 class CustomTokenRefreshView(TokenRefreshView):
@@ -134,7 +157,39 @@ class CustomTokenRefreshView(TokenRefreshView):
         tags=["Authentication"],
     )
     def post(self, request: Request, *args, **kwargs) -> Response:
-        return super().post(request, *args, **kwargs)
+        refresh_token = request.COOKIES.get("refresh")
+
+        if refresh_token:
+            request.data["refresh"] = refresh_token
+
+        refresh_res = super().post(request, *args, **kwargs)
+
+        if refresh_res.status_code == status.HTTP_200_OK:
+            access_token = refresh_res.data.get("access")
+
+            if access_token and refresh_token:
+                set_auth_cookies(
+                    refresh_res,
+                    access_token=access_token,
+                    refresh_token=refresh_token,
+                )
+
+                refresh_res.data.pop("access", None)
+                refresh_res.data.pop("refresh", None)
+
+                refresh_res.data["message"] = (
+                    "Access tokens refreshed successfully"
+                )
+            else:
+                refresh_res.data["message"] = (
+                    "Access or refresh tokens not found in refresh response "
+                    "data"
+                )
+                logger.error(
+                    "Access or refresh token not found in refresh response data"
+                )
+
+        return refresh_res
 
 
 class CustomProviderAuthView(ProviderAuthView):
@@ -183,7 +238,33 @@ class CustomProviderAuthView(ProviderAuthView):
         tags=["Authentication"],
     )
     def post(self, request: Request, *args, **kwargs) -> Response:
-        return super().post(request, *args, **kwargs)
+        provider_res = super().post(request, *args, **kwargs)
+
+        if provider_res.status_code == status.HTTP_201_CREATED:
+            access_token = provider_res.data.get("access")
+            refresh_token = provider_res.data.get("refresh")
+
+            if access_token and refresh_token:
+                set_auth_cookies(
+                    provider_res,
+                    access_token=access_token,
+                    refresh_token=refresh_token,
+                )
+
+                provider_res.data.pop("access", None)
+                provider_res.data.pop("refresh", None)
+
+                provider_res.data["message"] = "You are logged in Successfully"
+            else:
+                provider_res.data["message"] = (
+                    "Access or refresh token not found in provider response"
+                )
+                logger.error(
+                    "Access or refresh token not found in provider response "
+                    "data"
+                )
+
+        return provider_res
 
 
 class LogoutAPIView(APIView):
