@@ -39,30 +39,53 @@ RUN addgroup --system django && \
   chown django:django ${APP_HOME}/staticfiles && \
   chmod 775 ${APP_HOME}/staticfiles
 
+# Install additional runtime dependencies and clean up apt cache
 RUN apt-get update && apt-get install --no-install-recommends -y \
   libpq-dev \
   gettext \
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
 
+# Copy pre-built wheels from build stage
 COPY --from=python-build-stage /usr/src/app/wheels /wheels/
 
+# Install Python packages from wheels and clean up
 RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
   && rm -rf /wheels/
 
+# Copy and configure Django entrypoint script
 COPY --chown=django:django ./docker/local/django/entrypoint.sh /entrypoint
-RUN sed -i 's/\r$//g' /entrypoint
-RUN chmod +x /entrypoint
+RUN sed -i 's/\r$//g' /entrypoint  # Remove Windows line endings
+RUN chmod +x /entrypoint           # Make script executable
 
+# Copy and configure Django start script
 COPY --chown=django:django ./docker/local/django/start.sh /start
-RUN sed -i 's/\r$//g' /start
-RUN chmod +x /start
+RUN sed -i 's/\r$//g' /start      # Remove Windows line endings
+RUN chmod +x /start               # Make script executable
 
+# Copy and configure Celery worker start script
+COPY --chown=django:django ./docker/local/django/celery/worker/start.sh /start-celeryworker
+RUN sed -i 's/\r$//g' /start-celeryworker  
+RUN chmod +x /start-celeryworker           
 
+# Copy and configure Celery beat start script
+COPY --chown=django:django ./docker/local/django/celery/beat/start.sh /start-celerybeat
+RUN sed -i 's/\r$//g' /start-celerybeat    
+RUN chmod +x /start-celerybeat             
+
+# Copy and configure Celery flower start script
+COPY --chown=django:django ./docker/local/django/celery/flower/start.sh /start-flower
+RUN sed -i 's/\r$//g' /start-flower        
+RUN chmod +x /start-flower                 
+
+# Copy project files and set ownership
 COPY --chown=django:django . ${APP_HOME}
 
+# Ensure proper ownership of application directory
 RUN chown django:django ${APP_HOME}
 
+# Switch to non-root user
 USER django
 
+# Set the entrypoint script
 ENTRYPOINT [ "/entrypoint" ]
