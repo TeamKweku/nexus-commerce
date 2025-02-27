@@ -218,3 +218,117 @@ cloudinary.config(
     api_key=CLOUDINARY_API_KEY,
     api_secret=CLOUDINARY_API_SECRET,
 )
+
+
+# Name of the cookie used for storing access token
+COOKIE_NAME = "access"
+
+# Controls how the cookie is sent in cross-site requests
+# 'Lax' provides a balance between security and usability
+COOKIE_SAMESITE = "Lax"
+
+# Cookie is available for all paths in the domain
+COOKIE_PATH = "/"
+
+# Prevents JavaScript access to the cookie, mitigating XSS attacks
+COOKIE_HTTPONLY = True
+
+# Only send cookie over HTTPS in production (True), configurable via env var
+COOKIE_SECURE = getenv("COOKIE_SECURE", "True") == "True"
+
+
+REST_FRAMEWORK = {
+    # Specifies the authentication method using custom cookie-based
+    # JWT authentication
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "core_apps.common.cookie_auth.CookieAuthentication",
+    ),
+    # Requires users to be authenticated to access API endpoints by default
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+    # Enables page number-based pagination for API responses
+    "DEFAULT_PAGINATION_CLASS": (
+        "rest_framework.pagination.PageNumberPagination"
+    ),
+    # Adds Django Filter backend for advanced queryset filtering
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
+    # Sets number of items per page in paginated responses
+    "PAGE_SIZE": 10,
+    # Rate limiting classes for authenticated and anonymous users
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ),
+    # Defines rate limits: anonymous users can make 20 requests/day,
+    # authenticated users 400/day
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "20/day",
+        "user": "400/day",
+    },
+}
+
+
+# Djoser configuration settings for user authentication and management
+DJOSER = {
+    # Field used to identify users (UUID in this case)
+    "USER_ID_FIELD": "id",
+    # Use email instead of username for authentication
+    "LOGIN_FIELD": "email",
+    # Disable default token model as we're using JWT
+    "TOKEN_MODEL": None,
+    # Require password confirmation during user creation
+    "USER_CREATE_PASSWORD_RETYPE": True,
+    # Enable email verification for new accounts
+    "SEND_ACTIVATION_EMAIL": True,
+    # Send confirmation email when password is changed
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+    # Require password confirmation during reset
+    "PASSWORD_RESET_CONFIRM_RETYPE": True,
+    # URL pattern for account activation
+    "ACTIVATION_URL": "activate/{uid}/{token}",
+    # URL pattern for password reset confirmation
+    "PASSWORD_RESET_CONFIRM_URL": "password-reset/{uid}/{token}",
+    # Allowed redirect URIs for social authentication
+    "SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": getenv("REDIRECT_URIS", "").split(","),
+    # Custom serializers for user operations
+    "SERIALIZERS": {
+        # Custom serializer for user creation
+        "user_create": "core_apps.users.serializers.CreateUserSerializer",
+        # # Custom serializer for current user details
+        # "current_user": "core_apps.users.serializers.UserSerializer",
+    },
+}
+
+# JWT configuration settings
+SIMPLE_JWT = {
+    # Secret key used for signing JWT tokens
+    "SIGNING_KEY": getenv("SIGNING_KEY"),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    # Generate new refresh token after refresh
+    "ROTATE_REFRESH_TOKENS": True,
+    # Field used to identify users in the database
+    "USER_ID_FIELD": "id",
+    # Claim name for user ID in JWT payload
+    "USER_ID_CLAIM": "user_id",
+}
+
+
+# Google OAuth2 client ID from environment variables
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = getenv("GOOGLE_CLIENT_ID")
+# Google OAuth2 client secret from environment variables
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = getenv("GOOGLE_CLIENT_SECRET")
+# Required OAuth2 scopes for Google authentication
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    # Permission to access user's email
+    "https://www.googleapis.com/auth/userinfo.email",
+    # Permission to access user's profile information
+    "https://www.googleapis.com/auth/userinfo.profile",
+    # OpenID Connect authentication
+    "openid",
+]
+# Additional user data fields to fetch from Google
+SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ["first_name", "last_name"]
