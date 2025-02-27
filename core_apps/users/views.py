@@ -17,21 +17,20 @@ logger = logging.getLogger(__name__)
 
 
 def set_auth_cookies(
-    response: Response,
-    /,  # positional-only
-    access_token: str,
-    refresh_token: Optional[str] = None,
+    response: Response, access_token: str, refresh_token: Optional[str] = None
 ) -> None:
-    """Store authentication tokens as HTTP cookies.
+    """
+    Set authentication cookies in the response.
 
-    :param response: Response to modify
-    :param access_token: Token to store
-    :param refresh_token: Optional refresh token
+    Args:
+        response: The HTTP response object
+        access_token: JWT access token to be stored in cookie
+        refresh_token: Optional JWT refresh token to be stored in cookie
     """
     # Calculate access token expiry from settings
-    jwt_settings = settings.SIMPLE_JWT
-    access_expiry = jwt_settings["ACCESS_TOKEN_LIFETIME"]
-    access_token_lifetime = access_expiry.total_seconds()
+    access_token_lifetime = settings.SIMPLE_JWT[
+        "ACCESS_TOKEN_LIFETIME"
+    ].total_seconds()
 
     # Base cookie settings for security and configuration
     cookie_settings = {
@@ -47,8 +46,9 @@ def set_auth_cookies(
 
     # If refresh token provided, set it with its own expiry time
     if refresh_token:
-        refresh_expiry = jwt_settings["REFRESH_TOKEN_LIFETIME"]
-        refresh_token_lifetime = refresh_expiry.total_seconds()
+        refresh_token_lifetime = settings.SIMPLE_JWT[
+            "REFRESH_TOKEN_LIFETIME"
+        ].total_seconds()
         refresh_cookie_settings = cookie_settings.copy()
         refresh_cookie_settings["max_age"] = refresh_token_lifetime
         response.set_cookie("refresh", refresh_token, **refresh_cookie_settings)
