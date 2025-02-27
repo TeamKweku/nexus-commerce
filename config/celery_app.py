@@ -6,8 +6,8 @@ from django.conf import settings
 """
 Celery configuration module.
 
-This module sets up and configures Celery for asynchronous task processing 
-in the application. It integrates with Django settings and automatically 
+This module sets up and configures Celery for asynchronous task processing
+in the application. It integrates with Django settings and automatically
 discovers tasks from installed applications.
 """
 
