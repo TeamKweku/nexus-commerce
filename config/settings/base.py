@@ -1,3 +1,4 @@
+from datetime import timedelta
 from os import getenv, path
 from pathlib import Path
 
@@ -160,3 +161,48 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 TAGGIT_CASE_INSENSITIVE = True
 
 AUTH_USER_MODEL = "users.User"
+
+# Use Django's timezone settings for Celery if timezone support is enabled
+if USE_TZ:
+    CELERY_TIMEZONE = TIME_ZONE
+
+# Redis URL for message broker
+CELERY_BROKER_URL = getenv("CELERY_BROKER_URL")
+# Redis URL for storing results
+CELERY_RESULT_BACKEND = getenv("CELERY_RESULT_BACKEND")
+# Only accept JSON-serialized content
+CELERY_ACCEPT_CONTENT = ["application/json"]
+# Use JSON for serializing task messages
+CELERY_TASK_SERIALIZER = "json"
+# Use JSON for serializing results
+CELERY_RESULT_SERIALIZER = "json"
+# Maximum number of times to retry connecting to the result backend
+CELERY_RESULT_BACKEND_MAX_RETRIES = 10
+
+# Enable sending of task-sent events
+CELERY_TASK_SEND_SENT_EVENT = True
+# Include additional task result metadata
+CELERY_RESULT_EXTENDED = True
+
+# Always retry connecting to the result backend if connection fails
+CELERY_RESULT_BACKEND_ALWAYS_RETRY = True
+
+# Hard time limit for tasks (5 minutes)
+CELERY_TASK_TIME_LIMIT = 5 * 60
+
+# Soft time limit for tasks (1 minute) - allows for cleanup before hard limit
+CELERY_TASK_SOFT_TIME_LIMIT = 60
+
+# Use Django database as the scheduler backend
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+# Enable sending task events from workers
+CELERY_WORKER_SEND_TASK_EVENTS = True
+
+# Periodic task definitions
+CELERY_BEAT_SCHEDULE = {
+    "update-reputations-every-day": {
+        "task": "update_all_reputations",  # Task name to execute
+        "schedule": timedelta(days=1),  # Run once per day
+    }
+}
