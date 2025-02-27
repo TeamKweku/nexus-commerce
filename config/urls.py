@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
@@ -33,6 +33,10 @@ urlpatterns = [
     ),
     # Django admin site
     path(settings.ADMIN_URL, admin.site.urls),
+    # Djoser's built-in authentication URLs (registration, password reset, etc.)
+    path("api/v1/auth/", include("djoser.urls")),
+    # custom authentication URLs (login, logout, token refresh, social auth)
+    path("api/v1/auth/", include("core_apps.users.urls")),
 ]
 
 
