@@ -64,7 +64,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     @swagger_auto_schema(
         operation_summary="User Login",
         operation_description="""
-        Authenticate a user and obtain JWT tokens.       
+        Authenticate a user and obtain JWT tokens.
         The tokens will be set as HTTP-only cookies for enhanced security.
         """,
         request_body=openapi.Schema(
@@ -118,7 +118,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 token_res.data.pop("access", None)
                 token_res.data.pop("refresh", None)
 
-                token_res.data["message"] = "Login Successful"  # Removed period
+                token_res.data["message"] = "Login Successful"
             else:
                 token_res.data["message"] = "Login Failed"
                 logger.error(
@@ -132,7 +132,7 @@ class CustomTokenRefreshView(TokenRefreshView):
     @swagger_auto_schema(
         operation_summary="Refresh Access Token",
         operation_description="""
-        Obtain a new access token using refresh token.      
+        Obtain a new access token using refresh token.
         The refresh token should be present in the cookies.
         A new access token will be set as an HTTP-only cookie.
         """,
@@ -196,8 +196,8 @@ class CustomProviderAuthView(ProviderAuthView):
     @swagger_auto_schema(
         operation_summary="Social Authentication",
         operation_description="""
-        Authenticate using a social provider (Google, Facebook, etc.).     
-        Handles the OAuth2 callback and sets JWT tokens as cookies upon 
+        Authenticate using a social provider (Google, Facebook, etc.).
+        Handles the OAuth2 callback and sets JWT tokens as cookies upon
         successful authentication.
         """,
         manual_parameters=[
@@ -260,7 +260,7 @@ class CustomProviderAuthView(ProviderAuthView):
                     "Access or refresh token not found in provider response"
                 )
                 logger.error(
-                    "Access or refresh token not found in provider response "
+                    "Access or refresh token not found in provider response"
                     "data"
                 )
 
@@ -272,7 +272,6 @@ class LogoutAPIView(APIView):
         operation_summary="User Logout",
         operation_description="""
         Log out the current user.
-        
         Clears all authentication cookies (access token, refresh token, and
         logged_in status).
         """,

@@ -200,14 +200,6 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 # Enable sending task events from workers
 CELERY_WORKER_SEND_TASK_EVENTS = True
 
-# Periodic task definitions
-CELERY_BEAT_SCHEDULE = {
-    "update-reputations-every-day": {
-        "task": "update_all_reputations",  # Task name to execute
-        "schedule": timedelta(days=1),  # Run once per day
-    }
-}
-
 
 CLOUDINARY_CLOUD_NAME = getenv("CLOUDINARY_CLOUD_NAME")
 CLOUDINARY_API_KEY = getenv("CLOUDINARY_API_KEY")
@@ -297,8 +289,8 @@ DJOSER = {
     "SERIALIZERS": {
         # Custom serializer for user creation
         "user_create": "core_apps.users.serializers.CreateUserSerializer",
-        # # Custom serializer for current user details
-        # "current_user": "core_apps.users.serializers.UserSerializer",
+        # Custom serializer for current user details
+        "current_user": "core_apps.users.serializers.CustomUserSerializer",
     },
 }
 
@@ -332,6 +324,19 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
 ]
 # Additional user data fields to fetch from Google
 SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = ["first_name", "last_name"]
+
+# Define the social authentication pipeline
+SOCIAL_AUTH_PIPELINE = [
+    "social_core.pipeline.social_auth.social_details",
+    "social_core.pipeline.social_auth.social_uid",
+    "social_core.pipeline.social_auth.auth_allowed",
+    "social_core.pipeline.social_auth.social_user",
+    "social_core.pipeline.user.create_user",
+    "social_core.pipeline.social_auth.associate_user",
+    "social_core.pipeline.social_auth.load_extra_data",
+    "social_core.pipeline.user.user_details",
+    "core_apps.profiles.pipeline.save_profile",
+]
 
 # Define authentication backends for the application
 AUTHENTICATION_BACKENDS = (
