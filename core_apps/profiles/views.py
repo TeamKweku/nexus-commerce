@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
 from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, generics, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -46,6 +48,52 @@ class ProfileListAPIView(generics.ListAPIView):
     search_fields = ["user__username", "user__first_name", "user__last_name"]
     filterset_fields = ["user_type", "country", "city"]
 
+    @swagger_auto_schema(
+        operation_summary="List All Profiles",
+        operation_description="Retrieves a paginated list of all user profiles,"
+        "excluding staff and superusers.",
+        manual_parameters=[
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="Page number for pagination",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "page_size",
+                openapi.IN_QUERY,
+                description="Number of items per page (max 100)",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "search",
+                openapi.IN_QUERY,
+                description="Search profiles by username, first name, or"
+                "last name",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "user_type",
+                openapi.IN_QUERY,
+                description="Filter by user type",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "country",
+                openapi.IN_QUERY,
+                description="Filter by country",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "city",
+                openapi.IN_QUERY,
+                description="Filter by city",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={200: ProfileSerializer(many=True), 400: "Bad Request"},
+        tags=["Profiles"],
+    )
     def get_queryset(self) -> List[Profile]:
         """
         Returns queryset of regular user profiles, excluding staff and
@@ -69,23 +117,16 @@ class ProfileDetailAPIView(generics.RetrieveAPIView):
     renderer_classes = [GenericJSONRenderer]
     object_label = "profile"
 
-    def get_queryset(self) -> QuerySet:
-        """
-        Returns base queryset with related user data.
-        """
-        return Profile.objects.select_related("user").all()
-
-    def get_object(self) -> Profile:
-        """
-        Retrieves the profile for the current user.
-        Raises 404 if profile doesn't exist.
-        """
-        try:
-            return Profile.objects.select_related("user").get(
-                user=self.request.user
-            )
-        except Profile.DoesNotExist:
-            raise Http404("Profile not found")
+    @swagger_auto_schema(
+        operation_summary="Get Profile Details",
+        operation_description="Retrieves details of a specific user profile.",
+        responses={200: ProfileSerializer, 404: "Profile not found"},
+        tags=["Profiles"],
+    )
+    def get_object(self):
+        user = self.request.user
+        profile = Profile.objects.select_related("user").get(user=user)
+        return profile
 
 
 class ProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
@@ -98,28 +139,50 @@ class ProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
     renderer_classes = [GenericJSONRenderer]
     object_label = "profile"
 
-    def get_queryset(self):
-        """
-        Empty queryset since we're using get_object.
-        """
-        return Profile.objects.none()
+    @swagger_auto_schema(
+        operation_summary="Get Profile Details",
+        operation_description="Retrieves the profile details of the "
+        "authenticated user.",
+        responses={200: UpdateProfileSerializer, 404: "Profile not found"},
+        tags=["Profile"],
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
-    def get_object(self) -> Profile:
-        """
-        Gets or creates a profile for the current user.
-        """
-        profile, _ = Profile.objects.select_related("user").get_or_create(
+    @swagger_auto_schema(
+        operation_summary="Update Profile",
+        operation_description="Updates the profile information of the "
+        "authenticated user.",
+        request_body=UpdateProfileSerializer,
+        responses={
+            200: UpdateProfileSerializer,
+            400: "Bad Request",
+            404: "Profile not found",
+        },
+        tags=["Profile"],
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="Replace Profile",
+        operation_description="Completely replaces the profile information of "
+        "the authenticated user.",
+        request_body=UpdateProfileSerializer,
+        responses={
+            200: UpdateProfileSerializer,
+            400: "Bad Request",
+            404: "Profile not found",
+        },
+        tags=["Profile"],
+    )
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+
+    def get_object(self):
+        profile = Profile.objects.select_related("user").get(
             user=self.request.user
         )
-        return profile
-
-    def perform_update(self, serializer: UpdateProfileSerializer) -> Profile:
-        """
-        Updates both profile and user model data.
-        """
-        user_data = serializer.validated_data.pop("user", {})
-        profile = serializer.save()
-        User.objects.filter(id=self.request.user.id).update(**user_data)
         return profile
 
 
@@ -130,29 +193,37 @@ class AvatarUploadView(APIView):
     """
 
     renderer_classes = [GenericJSONRenderer]
+    serializer_class = AvatarUploadSerializer
 
-    def patch(self, request, *args, **kwargs):
-        """
-        Handles PATCH requests for avatar uploads.
-        """
-        return self.upload_avatar(request, *args, **kwargs)
+    @swagger_auto_schema(
+        operation_summary="Upload Profile Avatar",
+        operation_description="Uploads and processes a new avatar image for the"
+        "user profile.",
+        request_body=AvatarUploadSerializer,
+        responses={
+            202: openapi.Response(
+                description="Avatar upload accepted",
+                examples={
+                    "application/json": {"message": "Avatar upload in progress"}
+                },
+            ),
+            400: "Invalid image format or data",
+            404: "Profile not found",
+        },
+        tags=["Profile"],
+    )
+    def patch(self, request):
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            raise Http404("Profile not found")
 
-    def upload_avatar(self, request, *args, **kwargs):
-        """
-        Processes the avatar upload and queues it for Cloudinary processing.
-        """
-        profile = request.user.profile
-        serializer = AvatarUploadSerializer(profile, data=request.data)
-
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            image = serializer.validated_data["avatar"]
-            image_content = image.read()
-
-            # Queue the avatar upload task
-            upload_avatar_to_cloudinary.delay(str(profile.id), image_content)
-
+            avatar = serializer.validated_data["avatar"]
+            upload_avatar_to_cloudinary.delay(profile.id, avatar)
             return Response(
-                {"message": "Avatar upload started."},
+                {"message": "Avatar upload in progress"},
                 status=status.HTTP_202_ACCEPTED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -168,6 +239,12 @@ class PublicProfileDetailAPIView(generics.RetrieveAPIView):
     object_label = "profile"
     lookup_field = "slug"
 
+    @swagger_auto_schema(
+        operation_summary="Get Public Profile",
+        operation_description="Retrieves the public profile of a user by slug.",
+        responses={200: ProfileSerializer, 404: "Profile not found"},
+        tags=["Profile"],
+    )
     def get_queryset(self) -> QuerySet:
         """Returns base queryset excluding staff and superusers."""
         return (
