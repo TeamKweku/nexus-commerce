@@ -46,7 +46,7 @@ class Profile(TimeStampedModel):
     # Core Fields
     user = models.OneToOneField(
         User,
-        on_delete=models.CASCADE,  # Delete profile when user is deleted
+        on_delete=models.CASCADE,
         related_name="profile",
     )
     user_type = models.CharField(
@@ -56,39 +56,28 @@ class Profile(TimeStampedModel):
         default=UserType.BUYER,
     )
 
-    # Profile Information
     avatar = CloudinaryField(verbose_name=_("Avatar"), blank=True, null=True)
     bio = models.TextField(verbose_name=_("Bio"), blank=True, null=True)
     phone_number = PhoneNumberField(
-        verbose_name=_("Phone Number"), max_length=30, default="+23324874633"
+        verbose_name=_("Phone Number"),
+        max_length=30,
+        blank=True,  # Make it optional initially
+        help_text=_(
+            "Enter phone number in international format (e.g., +233123456789)"
+        ),
     )
 
-    # Billing Information
-    billing_address = models.CharField(
-        verbose_name=_("Billing Address"), max_length=255, blank=True, null=True
-    )
-    billing_country = CountryField(
-        verbose_name=_("Billing Country"), default="GH"
-    )
-    billing_city = models.CharField(
-        verbose_name=_("Billing City"), max_length=180, default="Accra"
-    )
-
-    # Shipping Information
-    shipping_address = models.CharField(
-        verbose_name=_("Shipping Address"),
+    address = models.CharField(
+        verbose_name=_("Address"),
         max_length=255,
         blank=True,
         null=True,
     )
-    shipping_country = CountryField(
-        verbose_name=_("Shipping Country"), default="GH"
-    )
-    shipping_city = models.CharField(
-        verbose_name=_("Shipping City"), max_length=180, default="Accra"
+    country = CountryField(verbose_name=_("Country"), default="GH")
+    city = models.CharField(
+        verbose_name=_("City"), max_length=180, default="Accra"
     )
 
-    # Auto-generated slug field for URLs
     slug = AutoSlugField(populate_from=get_user_username, unique=True)
 
     def __str__(self) -> str:

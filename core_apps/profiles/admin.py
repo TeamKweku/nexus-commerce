@@ -17,7 +17,7 @@ class ProfileAdmin(admin.ModelAdmin):
         "user",
         "user_type",
         "phone_number",
-        "billing_country",
+        "country",
     ]
 
     # Fields that link to the detail view
@@ -30,8 +30,7 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = [
         "user__username",  # Search by username
         "user__email",  # Search by email
-        "billing_city",  # Search by billing city
-        "shipping_city",  # Search by shipping city
+        "city",  # Search by city
     ]
 
     # Number of items to display per page

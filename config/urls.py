@@ -189,6 +189,7 @@ schema_view = get_schema_view(
     patterns=[
         path("api/v1/auth/", include("djoser.urls")),
         path("api/v1/auth/", include("core_apps.users.urls")),
+        path("api/v1/profiles/", include("core_apps.profiles.urls")),
     ],
 )
 
@@ -214,6 +215,8 @@ urlpatterns = [
     path("api/v1/auth/", include("djoser.urls")),
     # custom authentication URLs (login, logout, token refresh, social auth)
     path("api/v1/auth/", include("core_apps.users.urls")),
+    # Add this line to include profile URLs
+    path("api/v1/profiles/", include("core_apps.profiles.urls")),
 ]
 
 
