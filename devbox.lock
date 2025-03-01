@@ -245,6 +245,9 @@
         }
       }
     },
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "resolved": "github:NixOS/nixpkgs/3a05eebede89661660945da1f151959900903b6a?lastModified=1740547748&narHash=sha256-Ly2fBL1LscV%2BKyCqPRufUBuiw%2BzmWrlJzpWOWbahplg%3D"
+    },
     "pipenv@latest": {
       "last_modified": "2025-02-07T11:26:36Z",
       "resolved": "github:NixOS/nixpkgs/d98abf5cf5914e5e4e9d57205e3af55ca90ffc1d#pipenv",
