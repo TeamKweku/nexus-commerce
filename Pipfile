@@ -24,6 +24,8 @@ redis = "==5.0.3"
 celery = "==5.3.6"
 flower = "==2.0.1"
 flake8 = "*"
+django-mptt = "*"
+django-mptt-admin = "==2.5.1"
 
 [dev-packages]
 psycopg2-binary = "==2.9.9"
