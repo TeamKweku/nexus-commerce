@@ -19,8 +19,8 @@ class CategoryAdmin(DjangoMpttAdmin):
     # Fields that can be edited directly from the list view
     list_editable = ["is_active"]
 
-    # Automatically populate the slug field based on the name
-    prepopulated_fields = {"slug": ("name",)}
+    # Remove this line since we're using AutoSlugField
+    # prepopulated_fields = {"slug": ("name",)}
 
     # Fields that can be searched in the admin search bar
     search_fields = [
