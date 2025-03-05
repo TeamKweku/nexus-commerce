@@ -1,8 +1,16 @@
+from autoslug import AutoSlugField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
 
 from core_apps.common.models import TimeStampedModel
+
+
+def get_category_slug(instance):
+    """
+    Helper function to generate slug from category name.
+    """
+    return instance.name
 
 
 class CategoryManager(models.Manager):
@@ -22,11 +30,9 @@ class Category(MPTTModel, TimeStampedModel):
         unique=True,
         help_text=_("Format: required, unique, max-length=235"),
     )
-    slug = models.SlugField(
-        verbose_name=_("Category Slug"),
-        max_length=255,
+    slug = AutoSlugField(
+        populate_from=get_category_slug,
         unique=True,
-        help_text=_("Format: required, unique, max-length=255"),
     )
     description = models.TextField(
         verbose_name=_("Description"),
