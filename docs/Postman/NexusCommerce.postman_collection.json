@@ -1,0 +1,570 @@
+{
+	"info": {
+		"_postman_id": "b4c8d66f-8ba3-4e16-8c74-72362d4ef0d9",
+		"name": "NexusCommerce",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30692880"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"teamtest\",\n    \"first_name\":\"Jones\",\n    \"last_name\":\"Doe\",\n    \"email\":\"jonesdoe@example.com\",\n    \"password\":\"secret123456\",\n    \"re_password\":\"secret123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local-url}}/api/v1/auth/users/",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"users",
+								""
+							]
+						},
+						"description": "### Create User\n\nThis endpoint allows the client to create a new user account.\n\n#### Request Body\n\n- `username` (string, required): The username for the new user.\n    \n- `first_name` (string, required): The first name of the new user.\n    \n- `last_name` (string, required): The last name of the new user.\n    \n- `email` (string, required): The email address of the new user.\n    \n- `password` (string, required): The password for the new user.\n    \n- `re_password` (string, required): The re-entered password for confirmation.\n    \n\n#### Response\n\nThe response of this request is a JSON object conforming to the following schema:\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"id\": {\n      \"type\": \"string\"\n    },\n    \"username\": {\n      \"type\": \"string\"\n    },\n    \"email\": {\n      \"type\": \"string\"\n    }\n  }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Activate User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uid\":\"Mw\",\n    \"token\":\"clw417-53f2983ada7f62d9153a2a495f50afdf\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local-url}}/api/v1/auth/users/activation/",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"users",
+								"activation",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"jonesdoe@example.com\",\n  \"password\": \"secret123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local-url}}/api/v1/auth/login/",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login",
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Login User",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"jonesdoe@example.com\",\n  \"password\": \"secret123456\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/v1/auth/login/",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"login",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "nginx/1.25.3"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 02 Mar 2025 06:57:17 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "30"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept"
+								},
+								{
+									"key": "Allow",
+									"value": "POST, OPTIONS"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "Referrer-Policy",
+									"value": "same-origin"
+								},
+								{
+									"key": "Cross-Origin-Opener-Policy",
+									"value": "same-origin"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "access=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQwODk4OTM3LCJpYXQiOjE3NDA4OTg2MzcsImp0aSI6ImMzYjc3MjNkNjcyZDQyOTI5MWZjZWY4ZmQwZTlkZTc2IiwidXNlcl9pZCI6Ijc5NTQwM2Y3LTkzNTMtNDk2NS1hMTRlLTgxMTk0NDM1ZmYzOCJ9.3YSsIsGdocbNVuCDw3HNqNZe8D4CKoeNV68n-fyCZ10; expires=Sun, 02 Mar 2025 07:02:17 GMT; HttpOnly; Max-Age=300; Path=/; SameSite=Lax"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "refresh=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc0MDk4NTAzNywiaWF0IjoxNzQwODk4NjM3LCJqdGkiOiIxOWE1ZjEzMGYwZTg0MGU3OWMxZWIyZDQ5NGNkMGEzYiIsInVzZXJfaWQiOiI3OTU0MDNmNy05MzUzLTQ5NjUtYTE0ZS04MTE5NDQzNWZmMzgifQ.s2GZh1nyBXdyLm2TTrjDGPeSjSteu1N3bubWutg_TYA; expires=Mon, 03 Mar 2025 06:57:17 GMT; HttpOnly; Max-Age=86400; Path=/; SameSite=Lax"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "logged_in=true; expires=Sun, 02 Mar 2025 07:02:17 GMT; Max-Age=300; Path=/; SameSite=Lax"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Login Successful\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Logged In User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{local-url}}/api/v1/auth/users/me/",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"users",
+								"me",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local-url}}/api/v1/auth/refresh/",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refresh",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"jonesdoe@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local-url}}/api/v1/auth/users/reset_password/",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"users",
+								"reset_password",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Password Reset Confirmation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uid\": \"NQ\",\n    \"token\": \"clbalf-25c38044f4542d775469a17d69669a7c\",\n    \"new_password\": \"secret1234567\",\n    \"re_new_password\": \"secret1234567\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local-url}}/api/v1/auth/users/reset_password_confirm/",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"users",
+								"reset_password_confirm",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{local-url}}/api/v1/auth/logout/",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Goole Authorization URL",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{local-url}}/api/v1/auth/o/google-oauth2/?redirect_uri=http://localhost:8080/api/v1/auth/google",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"o",
+								"google-oauth2",
+								""
+							],
+							"query": [
+								{
+									"key": "redirect_uri",
+									"value": "http://localhost:8080/api/v1/auth/google"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login With Google",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{local-url}}/api/v1/auth/o/google-oauth2/?state=gdZ6KdpcNT7c7WweX5bKglRzefJBItvP&code=4%2F0AQSTgQGWcS6rwzE9mV9kjUMLTLlUAcCCafwq9AzF_VcKdeGkhG5yPKPmPBW-AllMtULrPg",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"o",
+								"google-oauth2",
+								""
+							],
+							"query": [
+								{
+									"key": "state",
+									"value": "gdZ6KdpcNT7c7WweX5bKglRzefJBItvP"
+								},
+								{
+									"key": "code",
+									"value": "4%2F0AQSTgQGWcS6rwzE9mV9kjUMLTLlUAcCCafwq9AzF_VcKdeGkhG5yPKPmPBW-AllMtULrPg"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Profiles",
+			"item": [
+				{
+					"name": "Get All Profiles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{local-url}}/api/v1/profiles/all/?page=1&page_size=2",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"profiles",
+								"all",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "page_size",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{local-url}}/api/v1/profiles/user/my-profile",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"profiles",
+								"user",
+								"my-profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"first_name\": \"Jones\",\n        \"last_name\": \"Doe\",\n        \"username\": \"teamtest\",\n        \"user_type\": \"buyer\",\n        \"bio\": \"This is my updated bio using the Postman interface to test the various update routes\",\n        \"address\": \"1234 Lashibi Road, Nungua\",\n        \"country\": \"Ghana\",\n        \"city\": \"Accra\"\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{local-url}}/api/v1/profiles/user/update/",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"profiles",
+								"user",
+								"update",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Avatar",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": "/home/teamkweku/Downloads/avatar.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{local-url}}/api/v1/profiles/user/avatar/",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"profiles",
+								"user",
+								"avatar",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile By Slug",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{local-url}}/api/v1/profiles/teamtest",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"profiles",
+								"teamtest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Profiles By Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{local-url}}/api/v1/profiles/all/?search=teamtest",
+							"host": [
+								"{{local-url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"profiles",
+								"all",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "teamtest"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

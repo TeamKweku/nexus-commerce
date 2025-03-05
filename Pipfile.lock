@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "91967dd823232325405344c7b78eda209d5801400c3344f2aa651147af86e1ae"
+            "sha256": "314b5335a08f69ffdd72dc15e6e641c580e1a536c11b58d8bcb20f8844b9f82a"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -410,6 +410,32 @@
             "index": "pypi",
             "markers": "python_version >= '3.8'",
             "version": "==24.1"
+        },
+        "django-js-asset": {
+            "hashes": [
+                "sha256:2f71e1e3df9c33fdccd2d41a50214a649cce64a832b42e1df26a79135fd3e8bd",
+                "sha256:b8855d9983174ea162c8fb2bfcb3c9ff559f373226554f196170c93f07597c3d"
+            ],
+            "markers": "python_version >= '3.10'",
+            "version": "==3.1.0"
+        },
+        "django-mptt": {
+            "hashes": [
+                "sha256:56c9606bf0b329b5f5afd55dd8bfd073612ea1d5999b10903b09de62bee84c8e",
+                "sha256:8716849ba3318d94e2e100ed0923a05c1ffdf8195f8472b690dbaf737d2af3b5"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.9'",
+            "version": "==0.16.0"
+        },
+        "django-mptt-admin": {
+            "hashes": [
+                "sha256:0bd1be3421450d1dfc08a2603a02bca11f066381ba906e5ebc80cbba1c0bae72",
+                "sha256:d91905bea029aabbca243436b72963341160eb54b7b6b49122a8843d0871fac6",
+                "sha256:e9ffc56cca1b1fbe79da0408ffdf03971077e4716b08b68028a22007b0852c40"
+            ],
+            "index": "pypi",
+            "version": "==2.5.1"
         },
         "django-phonenumber-field": {
             "hashes": [

@@ -4,6 +4,12 @@ from django.urls import include, path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
+from rest_framework.routers import DefaultRouter
+
+from core_apps.categories.views import CategoryViewSet
+
+router = DefaultRouter()
+router.register(r"categories", CategoryViewSet, basename="categories")
 
 # Djoser endpoint documentation
 djoser_endpoints = [
@@ -190,6 +196,7 @@ schema_view = get_schema_view(
         path("api/v1/auth/", include("djoser.urls")),
         path("api/v1/auth/", include("core_apps.users.urls")),
         path("api/v1/profiles/", include("core_apps.profiles.urls")),
+        path("api/v1/", include((router.urls, "categories"), namespace="v1")),
     ],
 )
 
@@ -217,6 +224,7 @@ urlpatterns = [
     path("api/v1/auth/", include("core_apps.users.urls")),
     # Add this line to include profile URLs
     path("api/v1/profiles/", include("core_apps.profiles.urls")),
+    path("api/v1/", include((router.urls, "categories"), namespace="v1")),
 ]
 
 

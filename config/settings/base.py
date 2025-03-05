@@ -39,12 +39,15 @@ THIRD_PARTY_APPS = [
     "djcelery_email",
     "cloudinary",
     "django_celery_beat",
+    "mptt",
+    "django_mptt_admin",
 ]
 
 LOCAL_APPS = [
     "core_apps.users",
     "core_apps.profiles",
     "core_apps.common",
+    "core_apps.categories",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
