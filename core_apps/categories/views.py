@@ -5,6 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from core_apps.common.renderers import GenericJSONRenderer
 
+from core_apps.common.renderers import GenericJSONRenderer
 from .models import Category
 from .serializers import CategorySerializer
 
@@ -38,6 +39,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_summary="Create Category",
         operation_description="Create a new category",
+
     )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
@@ -45,13 +47,14 @@ class CategoryViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_summary="Retrieve Category",
         operation_description="Get a specific category by its slug",
-    )
+
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_summary="Update Category",
         operation_description="Update all fields of a specific category",
+
     )
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
@@ -59,6 +62,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_summary="Partial Update Category",
         operation_description="Update specific fields of a category",
+
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)

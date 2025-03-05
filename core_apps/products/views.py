@@ -29,7 +29,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             .prefetch_related("product_lines")
             .filter(is_active=True)
         )
-
     @swagger_auto_schema(
         operation_summary="List Products",
         operation_description="""
