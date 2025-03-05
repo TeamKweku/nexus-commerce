@@ -67,26 +67,6 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
     phone_number = PhoneNumberField()
     country = CountryField(name_only=True)
 
-    def validate_phone_number(self, value):
-        """
-        Validate phone number format based on the country specified.
-        """
-        try:
-            # Get the country from the data or existing profile
-            country = self.initial_data.get("country") or self.instance.country
-            # Parse phone number with country context
-            parsed_number = parse_phone(str(value), country)
-            if not parsed_number.is_valid():
-                raise serializers.ValidationError(
-                    f"Please enter a valid phone number for {country}"
-                )
-            return value
-        except NumberParseException:
-            raise serializers.ValidationError(
-                "Please enter a valid international phone number "
-                "(e.g., +233123456789)"
-            )
-
     class Meta:
         model = Profile
         fields = [
@@ -101,11 +81,50 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
             "city",
         ]
 
+    def validate_phone_number(self, value):
+        """
+        Validate phone number format based on the country specified.
+        """
+        try:
+            country = self.initial_data.get("country") or self.instance.country
+            parsed_number = parse_phone(str(value), country)
+            if not parsed_number.is_valid():
+                raise serializers.ValidationError(
+                    f"Please enter a valid phone number for {country}"
+                )
+            return value
+        except NumberParseException:
+            raise serializers.ValidationError(
+                "Please enter a valid international phone number "
+                "(e.g., +233123456789)"
+            )
+
+    def update(self, instance, validated_data):
+        """
+        Handle nested updates for both Profile and User models.
+        """
+        user_data = validated_data.pop('user', {})
+        
+        # Update User model fields
+        if user_data:
+            user = instance.user
+            for attr, value in user_data.items():
+                setattr(user, attr, value)
+            user.save()
+
+        # Update Profile model fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        return instance
+
 
 class AvatarUploadSerializer(serializers.ModelSerializer):
     """
     Serializer for handling avatar image uploads.
     """
+    avatar = serializers.ImageField(required=True)
 
     class Meta:
         model = Profile
