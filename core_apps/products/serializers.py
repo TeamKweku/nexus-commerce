@@ -65,6 +65,7 @@ class ProductLineSerializer(serializers.ModelSerializer):
             "sku",
             "stock_qty",
             "weight",
+            "order",
             "product_images",
             "attribute_value",
         ]
@@ -86,10 +87,10 @@ class ProductLineSerializer(serializers.ModelSerializer):
         """Validate price is within acceptable range"""
         if value <= 0:
             raise serializers.ValidationError(
-                _("Price must be greater " "than zero.")
+                _("Price must be greater than zero.")
             )
-        if value >= 1000:
-            raise serializers.ValidationError(_("Price cannot exceed 999.99"))
+        if value >= 100000:
+            raise serializers.ValidationError(_("Price cannot exceed 99999.99"))
         return value
 
     def validate_sku(self, value):
@@ -133,7 +134,7 @@ class ProductSerializer(serializers.ModelSerializer):
                 attr_values.update(
                     {key["attribute"]["name"]: key["attribute_value"]}
                 )
-            data.update({"attribute": attr_values})
+            data.update({"specification": attr_values})
         return data
 
 
@@ -151,4 +152,22 @@ class ProductListSerializer(serializers.ModelSerializer):
             "slug",
             "category_name",
             "is_digital",
+        ]
+
+
+class ProductCategorySerializer(serializers.ModelSerializer):
+    """
+    Serializer for products when listed by category.
+    Includes minimal product information needed for category listing.
+    """
+
+    product_lines = ProductLineSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            "name",
+            "slug",
+            "description",
+            "product_lines",
         ]

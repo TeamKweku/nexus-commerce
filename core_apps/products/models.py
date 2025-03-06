@@ -99,6 +99,9 @@ class Product(TimeStampedModel):
         related_name="product_attr_value",
         verbose_name=_("Product Attributes"),
     )
+    product_type = models.ForeignKey(
+        "ProductType", on_delete=models.PROTECT, related_name="product_type"
+    )
 
     objects = IsActiveQueryset.as_manager()
 
@@ -129,9 +132,14 @@ class ProductLine(TimeStampedModel):
         verbose_name=_("Product"),
         help_text=_("Format: required, references Product model"),
     )
+    product_type = models.ForeignKey(
+        "ProductType",
+        on_delete=models.PROTECT,
+        related_name="product_line_type",
+    )
     price = models.DecimalField(
         verbose_name=_("Price"),
-        max_digits=5,
+        max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
@@ -302,3 +310,58 @@ class ProductLineAttributeValue(TimeStampedModel):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
+
+
+class ProductType(TimeStampedModel):
+    """
+    ProductType model defining categories of products with shared attributes.
+    Example: T-Shirt, Book, Digital Download
+    """
+
+    name = models.CharField(
+        verbose_name=_("Type Name"),
+        max_length=100,
+        unique=True,
+    )
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    attribute = models.ManyToManyField(
+        Attribute,
+        through="ProductTypeAttribute",
+        related_name="product_type_attribute",
+    )
+
+    class Meta:
+        verbose_name = _("Product Type")
+        verbose_name_plural = _("Product Types")
+        ordering = ["name"]
+
+    def __str__(self):
+        return str(self.name)
+
+
+class ProductTypeAttribute(TimeStampedModel):
+    """
+    Bridge model linking ProductType with Attribute.
+    Defines which attributes are available for products of this type.
+    """
+
+    product_type = models.ForeignKey(
+        ProductType,
+        on_delete=models.CASCADE,
+        related_name="product_type_attribute_pt",
+    )
+    attribute = models.ForeignKey(
+        Attribute,
+        on_delete=models.CASCADE,
+        related_name="product_type_attribute_at",
+    )
+
+    class Meta:
+        unique_together = ("product_type", "attribute")
+        verbose_name = _("Product Type Attribute")
+        verbose_name_plural = _("Product Type Attributes")
