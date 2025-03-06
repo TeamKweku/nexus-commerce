@@ -1,9 +1,14 @@
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from core_apps.categories.serializers import CategorySerializer
-
-from .models import Product, ProductLine, ProductImage
+from .models import (
+    Attribute,
+    AttributeValue,
+    Product,
+    ProductAttributeValue,
+    ProductImage,
+    ProductLine,
+)
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -11,20 +16,47 @@ class ProductImageSerializer(serializers.ModelSerializer):
     Serializer for ProductImage model.
     Used as nested serializer within ProductLineSerializer.
     """
+
     class Meta:
         model = ProductImage
-        fields = [
-            "alternative_text",
-            "url",
-            "order"
-        ]
+        exclude = ("id", "product_line")
+
+
+class AttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attribute
+        fields = ("name", "id")
+
+
+class AttributeValueSerializer(serializers.ModelSerializer):
+    attribute = AttributeSerializer(many=False)
+
+    class Meta:
+        model = AttributeValue
+        fields = (
+            "attribute",
+            "attribute_value",
+        )
+
+
+class ProductAttributeValueSerializer(serializers.ModelSerializer):
+    """Serializer for ProductAttributeValue model"""
+
+    attribute = AttributeSerializer(source="attribute_value.attribute")
+    value = serializers.CharField(source="attribute_value.value")
+
+    class Meta:
+        model = ProductAttributeValue
+        fields = ["attribute", "value"]
 
 
 class ProductLineSerializer(serializers.ModelSerializer):
     """
     Serializer for ProductLine model with nested product images.
     """
+
     product_images = ProductImageSerializer(many=True, read_only=True)
+    attribute_value = AttributeValueSerializer(many=True, read_only=True)
 
     class Meta:
         model = ProductLine
@@ -33,9 +65,22 @@ class ProductLineSerializer(serializers.ModelSerializer):
             "sku",
             "stock_qty",
             "weight",
-            "product_images"
+            "product_images",
+            "attribute_value",
         ]
         read_only_fields = ["created_at", "updated_at"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if "attribute_value" in data:
+            av_data = data.pop("attribute_value")
+            attr_values = {}
+            for key in av_data:
+                attr_values.update(
+                    {key["attribute"]["name"]: key["attribute_value"]}
+                )
+            data.update({"specification": attr_values})
+        return data
 
     def validate_price(self, value):
         """Validate price is within acceptable range"""
@@ -58,10 +103,14 @@ class ProductLineSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     """
-    Product serializer with nested ProductLines.
+    Product serializer with nested ProductLines and attributes.
     """
-    product_lines = ProductLineSerializer(many=True)
-    category_name = serializers.CharField(source='category.name')
+
+    product_lines = ProductLineSerializer(many=True, required=False)
+    category = serializers.CharField(source="category.name")
+    attribute_value = AttributeValueSerializer(
+        source="attribute_values", many=True, read_only=True
+    )
 
     class Meta:
         model = Product
@@ -69,38 +118,23 @@ class ProductSerializer(serializers.ModelSerializer):
             "name",
             "slug",
             "description",
-            "category_name",
-            "is_digital",
-            "is_active",
-            "created_at",
+            "category",
+            "attribute_value",
             "product_lines",
         ]
         read_only_fields = ["created_at", "slug"]
 
-    def create(self, validated_data):
-        product_lines_data = validated_data.pop("product_lines")
-        product = Product.objects.create(**validated_data)
-
-        for line_data in product_lines_data:
-            ProductLine.objects.create(product=product, **line_data)
-
-        return product
-
-    def update(self, instance, validated_data):
-        product_lines_data = validated_data.pop("product_lines", None)
-
-        # Update product fields
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-        # Update product lines if provided
-        if product_lines_data is not None:
-            instance.product_lines.all().delete()  # Remove existing lines
-            for line_data in product_lines_data:
-                ProductLine.objects.create(product=instance, **line_data)
-
-        return instance
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if "attribute_value" in data:
+            av_data = data.pop("attribute_value")
+            attr_values = {}
+            for key in av_data:
+                attr_values.update(
+                    {key["attribute"]["name"]: key["attribute_value"]}
+                )
+            data.update({"attribute": attr_values})
+        return data
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -117,5 +151,4 @@ class ProductListSerializer(serializers.ModelSerializer):
             "slug",
             "category_name",
             "is_digital",
-            "is_active",
         ]

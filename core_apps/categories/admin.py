@@ -5,29 +5,12 @@ from .models import Category
 
 
 class CategoryAdmin(DjangoMpttAdmin):
-    """
-    Admin interface configuration for the Category model.
-    Inherits from DjangoMpttAdmin to provide hierarchical category management.
-    """
+    """Admin interface configuration for the Category model."""
 
-    # Fields to display in the admin list view
     list_display = ["name", "slug", "parent", "is_active"]
-
-    # Fields that can be filtered in the right sidebar
     list_filter = ["is_active"]
-
-    # Fields that can be edited directly from the list view
     list_editable = ["is_active"]
-
-    # Remove this line since we're using AutoSlugField
-    # prepopulated_fields = {"slug": ("name",)}
-
-    # Fields that can be searched in the admin search bar
-    search_fields = [
-        "name",  # Search by category name
-        "slug",  # Search by category slug
-    ]
+    search_fields = ["name", "slug"]
 
 
-# Register the Category model with its custom admin configuration
 admin.site.register(Category, CategoryAdmin)

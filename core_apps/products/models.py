@@ -5,11 +5,35 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from mptt.models import TreeForeignKey
 
 from core_apps.categories.models import Category
 from core_apps.common.models import TimeStampedModel
 
 from .fields import OrderField
+
+
+class Attribute(TimeStampedModel):
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class AttributeValue(TimeStampedModel):
+    attribute_value = models.CharField(max_length=100)
+    attribute = models.ForeignKey(
+        Attribute,
+        on_delete=models.CASCADE,
+        related_name="attribute_value",
+    )
+
+    def __str__(self):
+        return f"{self.attribute.name}-{self.attribute_value}"
 
 
 def get_product_slug(instance: "Product") -> str:
@@ -62,16 +86,18 @@ class Product(TimeStampedModel):
         default=False,
         help_text=_("Format: true=Digital Product, false=Physical Product"),
     )
-    category = models.ForeignKey(
+    category = TreeForeignKey(
         Category,
-        verbose_name=_("Product Category"),
         on_delete=models.PROTECT,
-        help_text=_("Format: required, reference to Category"),
+        related_name="products",
+        verbose_name=_("Category"),
     )
-    is_active = models.BooleanField(
-        verbose_name=_("Product Visibility"),
-        default=False,
-        help_text=_("Format: true=product visible"),
+    is_active = models.BooleanField(default=False)
+    attribute_values = models.ManyToManyField(
+        "AttributeValue",
+        through="ProductAttributeValue",
+        related_name="product_attr_value",
+        verbose_name=_("Product Attributes"),
     )
 
     objects = IsActiveQueryset.as_manager()
@@ -83,10 +109,6 @@ class Product(TimeStampedModel):
 
     def __str__(self):
         return self.name
-
-    def clean(self):
-        if hasattr(self, "pid") and len(self.pid) > 10:
-            raise ValidationError(_("PID length cannot exceed 10 characters."))
 
 
 class ProductLine(TimeStampedModel):
@@ -107,44 +129,22 @@ class ProductLine(TimeStampedModel):
         verbose_name=_("Product"),
         help_text=_("Format: required, references Product model"),
     )
-
     price = models.DecimalField(
         verbose_name=_("Price"),
         max_digits=5,
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.01"))],
-        help_text=_("Format: maximum price 999.99, decimal places 2"),
     )
-
-    sku = models.CharField(
-        verbose_name=_("Stock Keeping Unit"),
-        max_length=10,
-        unique=True,
-        help_text=_("Format: required, unique, max-length=10"),
-    )
-
-    stock_qty = models.PositiveIntegerField(
-        verbose_name=_("Stock Quantity"),
-        default=0,
-        help_text=_("Format: required, default=0"),
-    )
-
-    is_active = models.BooleanField(
-        verbose_name=_("Is Active"),
-        default=False,
-        help_text=_("Format: true=product line is active"),
-    )
-
-    weight = models.FloatField(
-        verbose_name=_("Weight"),
-        help_text=_("Format: required, in kilograms"),
-    )
-
-    order = OrderField(
-        unique_for_field="product",
-        blank=True,  # Allow blank, OrderField will handle assignment
-        verbose_name=_("Display Order"),
-        help_text=_("Format: auto-assigned if not specified"),
+    sku = models.CharField(max_length=10)
+    stock_qty = models.IntegerField()
+    weight = models.FloatField()
+    is_active = models.BooleanField(default=False)
+    order = OrderField(unique_for_field="product", blank=True)
+    attribute_value = models.ManyToManyField(
+        "AttributeValue",
+        through="ProductLineAttributeValue",
+        related_name="product_line_attribute_value",
+        verbose_name=_("Attribute Values"),
     )
 
     objects = IsActiveQueryset.as_manager()
@@ -159,11 +159,20 @@ class ProductLine(TimeStampedModel):
 
     def clean(self):
         """Validate product line data"""
+        if self.price is None:
+            raise ValidationError(_("Price is required."))
+
         if self.price <= 0:
             raise ValidationError(_("Price must be greater than zero."))
 
+        if self.stock_qty is None:
+            raise ValidationError(_("Stock quantity is required."))
+
         if self.stock_qty < 0:
             raise ValidationError(_("Stock quantity cannot be negative."))
+
+        if self.weight is None:
+            raise ValidationError(_("Weight is required."))
 
         if self.weight <= 0:
             raise ValidationError(_("Weight must be greater than zero."))
@@ -227,3 +236,69 @@ class ProductImage(TimeStampedModel):
                 raise ValidationError(
                     _("Duplicate order value for this product line.")
                 )
+
+
+class ProductAttributeValue(TimeStampedModel):
+    """
+    Bridge model linking Product with AttributeValue.
+    Defines which attribute values are available at product level.
+    """
+
+    attribute_value = models.ForeignKey(
+        AttributeValue,
+        on_delete=models.CASCADE,
+        related_name="product_value_av",
+    )
+    product = models.ForeignKey(
+        "Product",
+        on_delete=models.CASCADE,
+        related_name="product_value_pl",
+    )
+
+    class Meta:
+        unique_together = ("attribute_value", "product")
+
+
+class ProductLineAttributeValue(TimeStampedModel):
+    """
+    Bridge model linking ProductLine with AttributeValue.
+    Defines specific attribute values for each product variant.
+    """
+
+    attribute_value = models.ForeignKey(
+        AttributeValue,
+        on_delete=models.CASCADE,
+        related_name="product_attribute_value_av",
+    )
+    product_line = models.ForeignKey(
+        "ProductLine",
+        on_delete=models.CASCADE,
+        related_name="product_attribute_value_pl",
+    )
+
+    class Meta:
+        unique_together = ("attribute_value", "product_line")
+
+    def clean(self):
+        """
+        Validate that no duplicate attributes exist for a product line.
+        """
+        qs = (
+            ProductLineAttributeValue.objects.filter(
+                attribute_value=self.attribute_value
+            )
+            .filter(product_line=self.product_line)
+            .exists()
+        )
+
+        if not qs:
+            iqs = Attribute.objects.filter(
+                attribute_value__product_attribute_value_av=self.product_line
+            ).values_list("pk", flat=True)
+
+            if self.attribute_value.attribute.id in list(iqs):
+                raise ValidationError(_("Duplicate attribute exists"))
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
