@@ -1,5 +1,8 @@
+from typing import List, Type
+
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
+from django.db import models
 
 from .models import ContentView
 
@@ -9,10 +12,13 @@ class ContentViewAdmin(admin.ModelAdmin):
     """
     Admin configuration for ContentView model.
     Displays key information about content views in the Django admin interface.
+
+    Attributes:
+        list_display: Fields to display in the list view, showing content
+        object, viewer details, and timestamp
     """
 
-    # Configure which fields to display in the list view
-    list_display = [
+    list_display: List[str] = [
         "content_object",  # The object that was viewed
         "user",  # User who viewed the content
         "viewer_ip",  # IP address of the viewer
@@ -28,13 +34,18 @@ class ContentViewInline(GenericTabularInline):
     This inline can be included in any model's admin to show its view
     statistics. Uses Django's GenericTabularInline for generic relation
     support.
+
+    Attributes:
+        model: The model class to be displayed inline
+        extra: Number of extra empty forms to display
+        readonly_fields: Fields that cannot be modified through the
+        inline interface
     """
 
-    model = ContentView  # The model to be displayed inline
-    extra = 0  # No extra empty forms
+    model: Type[models.Model] = ContentView  # The model to be displayed inline
+    extra: int = 0  # No extra empty forms
 
-    # Fields that cannot be modified through the inline interface
-    readonly_fields = [
+    readonly_fields: List[str] = [
         "user",  # Who viewed the content
         "viewer_ip",  # Their IP address
         "created_at",  # When the view occurred
