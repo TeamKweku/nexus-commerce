@@ -19,7 +19,11 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductImage
-        exclude = ("id", "product_line")
+        fields = [
+            "alternative_text",
+            "url",
+            "order",
+        ]
 
 
 class AttributeSerializer(serializers.ModelSerializer):
@@ -60,6 +64,7 @@ class ProductLineSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductLine
         fields = [
+            "id",
             "price",
             "sku",
             "stock_qty",
@@ -118,6 +123,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
+            "id",
             "name",
             "slug",
             "description",
