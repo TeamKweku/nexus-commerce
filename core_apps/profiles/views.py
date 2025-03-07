@@ -1,9 +1,14 @@
+from typing import Any, Type
+
+from django.db.models import QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 
 from core_apps.common.renderers import GenericJSONRenderer
 
@@ -17,6 +22,21 @@ from .tasks import upload_avatar_to_cloudinary
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing user profiles.
+
+    Provides CRUD operations for Profile model with additional custom actions.
+    Includes filtering, searching, and custom renderers.
+
+    Attributes:
+        renderer_classes: Custom JSON renderer for consistent API responses
+        object_label: Label used in response data
+        filter_backends: Backend classes for filtering and searching
+        search_fields: Fields available for text search
+        filterset_fields: Fields available for filtering
+        lookup_field: Field used for retrieving specific profiles
+    """
+
     renderer_classes = [GenericJSONRenderer]
     object_label = "profiles"
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
@@ -24,7 +44,13 @@ class ProfileViewSet(viewsets.ModelViewSet):
     filterset_fields = ["user_type", "country", "city"]
     lookup_field = "slug"
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
+        """
+        Get the list of profiles for the view.
+
+        Returns:
+            QuerySet: Filtered queryset of Profile objects
+        """
         if self.action in ["my_profile", "update_profile", "upload_avatar"]:
             return Profile.objects.select_related("user").all()
         return (
@@ -34,7 +60,13 @@ class ProfileViewSet(viewsets.ModelViewSet):
             .all()
         )
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> Type[Serializer]:
+        """
+        Get the appropriate serializer class based on the current action.
+
+        Returns:
+            Type[Serializer]: Serializer class to use
+        """
         if self.action == "update_profile":
             return UpdateProfileSerializer
         if self.action == "upload_avatar":
@@ -49,20 +81,30 @@ class ProfileViewSet(viewsets.ModelViewSet):
             openapi.Parameter(
                 "search",
                 openapi.IN_QUERY,
-                description="Search profiles by username, first name, or last "
-                "name",
+                description="Search profiles by username, first name, or "
+                "last name",
                 type=openapi.TYPE_STRING,
             ),
             openapi.Parameter(
                 "user_type",
                 openapi.IN_QUERY,
-                description="Filter by user type",
+                description="Filter by user type (buyer, seller, admin)",
                 type=openapi.TYPE_STRING,
-                enum=["buyer", "seller", "admin"],
             ),
         ],
     )
-    def list(self, request, *args, **kwargs):
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """
+        List all profiles with pagination and filtering.
+
+        Args:
+            request: HTTP request object
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+
+        Returns:
+            Response: Paginated list of profiles
+        """
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(

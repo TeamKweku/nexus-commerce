@@ -6,25 +6,25 @@ class ProfilesConfig(AppConfig):
     """
     Configuration class for the profiles app.
 
-    This class defines app-specific configurations and initializes
-    signal handlers when the app is ready.
+    Defines app-specific configurations and initializes signal handlers.
+
+    Attributes:
+        default_auto_field: Primary key field type for models
+        name: Python path to the application
+        verbose_name: Human-readable app name
     """
 
-    # Use BigAutoField as the primary key type for all models
     default_auto_field = "django.db.models.BigAutoField"
-
-    # Full Python path to the application
     name = "core_apps.profiles"
-
-    # Human-readable name for the app (translatable)
     verbose_name = _("Profiles")
 
     def ready(self) -> None:
         """
-        Callback when app is ready to be used.
+        Perform initialization tasks when app is ready.
 
-        Imports the signals module to register signal handlers.
-        The noqa comment prevents flake8 from flagging the import
-        as unused since it's needed for signal registration.
+        Imports and registers signal handlers for profile creation.
+
+        Returns:
+            None
         """
         import core_apps.profiles.signals  # noqa: F401

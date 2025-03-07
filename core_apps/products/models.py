@@ -4,6 +4,7 @@ from autoslug import AutoSlugField
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.manager import Manager
 from django.utils.translation import gettext_lazy as _
 from mptt.models import TreeForeignKey
 
@@ -14,25 +15,41 @@ from .fields import OrderField
 
 
 class Attribute(TimeStampedModel):
-    name = models.CharField(
+    """
+    Model for product attributes (e.g., Color, Size, Material).
+
+    Attributes:
+        name: Unique identifier for the attribute
+        description: Optional detailed description of the attribute
+    """
+
+    name: models.CharField = models.CharField(
         max_length=100,
         unique=True,
     )
-    description = models.TextField(blank=True)
+    description: models.TextField = models.TextField(blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
 class AttributeValue(TimeStampedModel):
-    attribute_value = models.CharField(max_length=100)
-    attribute = models.ForeignKey(
+    """
+    Model for specific values of attributes (e.g., Red, XL, Cotton).
+
+    Attributes:
+        attribute_value: Specific value for an attribute
+        attribute: Reference to the parent attribute
+    """
+
+    attribute_value: models.CharField = models.CharField(max_length=100)
+    attribute: models.ForeignKey = models.ForeignKey(
         Attribute,
         on_delete=models.CASCADE,
         related_name="attribute_value",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.attribute.name}-{self.attribute_value}"
 
 
@@ -50,67 +67,79 @@ def get_product_slug(instance: "Product") -> str:
 
 
 class IsActiveQueryset(models.QuerySet):
-    """Custom queryset to filter active products"""
+    """
+    Custom queryset to filter active products.
 
-    def is_active(self):
+    Provides methods to filter objects based on their active status.
+    """
+
+    def is_active(self) -> models.QuerySet:
+        """Filter queryset to return only active items."""
         return self.filter(is_active=True)
 
 
 class Product(TimeStampedModel):
     """
     Core Product model representing basic product information.
-    Additional features like product lines, attributes will be added later.
 
-    Inherits from TimeStampedModel to include:
-    - UUID-based id
-    - Auto-managed created_at and updated_at fields
-    - BigAutoField pkid as primary key
+    This model stores the fundamental details of a product, serving as the base
+    for more specific product variations (ProductLine).
+
+    Attributes:
+        name: Product's display name
+        slug: URL-friendly identifier
+        description: Detailed product description
+        is_digital: Whether the product is digital or physical
+        category: Product's category in the hierarchy
+        is_active: Product's visibility status
+        attribute_values: Associated attribute values
+        product_type: Type classification of the product
     """
 
-    name = models.CharField(
+    name: models.CharField = models.CharField(
         verbose_name=_("Product Name"),
         max_length=100,
         help_text=_("Format: required, max-length=100"),
     )
-    slug = AutoSlugField(
+    slug: AutoSlugField = AutoSlugField(
         populate_from=get_product_slug,
         unique=True,
     )
-    description = models.TextField(
+    description: models.TextField = models.TextField(
         verbose_name=_("Description"),
         blank=True,
         help_text=_("Format: optional"),
     )
-    is_digital = models.BooleanField(
+    is_digital: models.BooleanField = models.BooleanField(
         verbose_name=_("Digital Product"),
         default=False,
         help_text=_("Format: true=Digital Product, false=Physical Product"),
     )
-    category = TreeForeignKey(
+    category: TreeForeignKey = TreeForeignKey(
         Category,
         on_delete=models.PROTECT,
         related_name="products",
         verbose_name=_("Category"),
     )
-    is_active = models.BooleanField(default=False)
-    attribute_values = models.ManyToManyField(
+    is_active: models.BooleanField = models.BooleanField(default=False)
+    attribute_values: models.ManyToManyField = models.ManyToManyField(
         "AttributeValue",
         through="ProductAttributeValue",
         related_name="product_attr_value",
         verbose_name=_("Product Attributes"),
     )
-    product_type = models.ForeignKey(
+    product_type: models.ForeignKey = models.ForeignKey(
         "ProductType", on_delete=models.PROTECT, related_name="product_type"
     )
 
-    objects = IsActiveQueryset.as_manager()
+    objects: Manager = IsActiveQueryset.as_manager()
 
     class Meta:
         verbose_name = _("Product")
         verbose_name_plural = _("Products")
         ordering = ["-created_at"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 from django.conf import settings
 from rest_framework.request import Request
@@ -8,7 +8,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import Token
 
 # Configure logger for authentication-related events
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class CookieAuthentication(JWTAuthentication):
@@ -16,9 +16,18 @@ class CookieAuthentication(JWTAuthentication):
     Custom authentication class that extends JWT authentication to
     support cookies.
 
-    This class allows JWT tokens to be retrieved from either:
+    This class implements a dual authentication strategy:
     1. The Authorization header (standard JWT behavior)
     2. A cookie (custom implementation)
+
+    The authentication process follows this sequence:
+    1. Check Authorization header for token
+    2. If not found, check cookies for token
+    3. Validate found token
+    4. Return authenticated user and token
+
+    Attributes:
+        Inherits all attributes from JWTAuthentication
     """
 
     def authenticate(
@@ -27,17 +36,28 @@ class CookieAuthentication(JWTAuthentication):
         """
         Authenticate the request using JWT token from header or cookie.
 
+        The method attempts to find a valid token in the following order:
+        1. Authorization header
+        2. Cookie specified by settings.COOKIE_NAME
+
         Args:
-            request: The incoming HTTP request object
+            request: The incoming HTTP request object containing headers
+            and cookies
 
         Returns:
             Optional[Tuple[AuthUser, Token]]: A tuple containing the
-            authenticated user and valid token if authentication succeeds,
-            None otherwise.
+            authenticated
+                user and valid token if authentication succeeds, None if:
+                - No token found in header or cookie
+                - Token validation fails
+                - User lookup fails
+
+        Raises:
+            No exceptions are raised; all errors are logged and None is returned
         """
         # First try to get token from Authorization header
-        header = self.get_header(request)
-        raw_token = None
+        header: Optional[bytes] = self.get_header(request)
+        raw_token: Optional[Union[str, bytes]] = None
 
         # Check for token in header first
         if header is not None:
@@ -50,7 +70,7 @@ class CookieAuthentication(JWTAuthentication):
         if raw_token is not None:
             try:
                 # Validate the token and get associated user
-                validated_token = self.get_validated_token(raw_token)
+                validated_token: Token = self.get_validated_token(raw_token)
                 return self.get_user(validated_token), validated_token
 
             except TokenError as e:
