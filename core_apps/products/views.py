@@ -90,5 +90,12 @@ class ProductViewSet(viewsets.ModelViewSet):
     def list_by_category(self, request, slug=None):
         """Return products filtered by category slug"""
         queryset = self.get_queryset().filter(category__slug=slug)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ProductCategorySerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = ProductCategorySerializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response(
+            {"count": len(serializer.data), "results": serializer.data}
+        )

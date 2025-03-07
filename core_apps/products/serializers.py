@@ -56,7 +56,6 @@ class ProductLineSerializer(serializers.ModelSerializer):
     """
 
     product_images = ProductImageSerializer(many=True, read_only=True)
-    attribute_value = AttributeValueSerializer(many=True, read_only=True)
 
     class Meta:
         model = ProductLine
@@ -67,21 +66,8 @@ class ProductLineSerializer(serializers.ModelSerializer):
             "weight",
             "order",
             "product_images",
-            "attribute_value",
         ]
         read_only_fields = ["created_at", "updated_at"]
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if "attribute_value" in data:
-            av_data = data.pop("attribute_value")
-            attr_values = {}
-            for key in av_data:
-                attr_values.update(
-                    {key["attribute"]["name"]: key["attribute_value"]}
-                )
-            data.update({"specification": attr_values})
-        return data
 
     def validate_price(self, value):
         """Validate price is within acceptable range"""
@@ -98,6 +84,22 @@ class ProductLineSerializer(serializers.ModelSerializer):
         if len(value) > 10:
             raise serializers.ValidationError(
                 _("SKU cannot exceed 10 characters.")
+            )
+        return value
+
+    def validate_stock_qty(self, value):
+        """Validate stock quantity is non-negative"""
+        if value < 0:
+            raise serializers.ValidationError(
+                _("Stock quantity cannot be negative.")
+            )
+        return value
+
+    def validate_weight(self, value):
+        """Validate weight is positive"""
+        if value <= 0:
+            raise serializers.ValidationError(
+                _("Weight must be greater than zero.")
             )
         return value
 

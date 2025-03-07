@@ -103,8 +103,8 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
         """
         Handle nested updates for both Profile and User models.
         """
-        user_data = validated_data.pop('user', {})
-        
+        user_data = validated_data.pop("user", {})
+
         # Update User model fields
         if user_data:
             user = instance.user
@@ -124,6 +124,7 @@ class AvatarUploadSerializer(serializers.ModelSerializer):
     """
     Serializer for handling avatar image uploads.
     """
+
     avatar = serializers.ImageField(required=True)
 
     class Meta:
