@@ -37,6 +37,8 @@ THIRD_PARTY_APPS = [
     "taggit",
     "django_filters",
     "djcelery_email",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "cloudinary",
     "django_celery_beat",
     "mptt",
