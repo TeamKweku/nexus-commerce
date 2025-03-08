@@ -139,16 +139,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-
-LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "Africa/Accra"
-
-USE_I18N = True
-
+# Internationalization and Localization
 USE_TZ = True
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_L10N = True
 
 SITE_ID = 1
 

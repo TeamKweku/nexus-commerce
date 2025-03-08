@@ -35,8 +35,8 @@ services:
     env_file:
       - ./.envs/.env.local
     networks:
-      - nexuscommerce_nw 
-  
+      - nexuscommerce_nw
+
   mailpit:
     image: docker.io/axllent/mailpit:v1.22
     container_name: nexuscommerce_mailpit
