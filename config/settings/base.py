@@ -18,6 +18,7 @@ if path.isfile(local_env_file):
 
 # Application definition
 DJANGO_APPS = [
+    "jet",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
