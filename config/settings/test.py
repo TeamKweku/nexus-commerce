@@ -25,7 +25,3 @@ CELERY_TASK_EAGER_PROPAGATES = True
 
 # Disable email sending during tests
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
-
-# Test-specific settings
-SITE_NAME = "Test Site"
-DOMAIN = "example.com"
