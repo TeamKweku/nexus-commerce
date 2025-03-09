@@ -18,6 +18,7 @@ if path.isfile(local_env_file):
 
 # Application definition
 DJANGO_APPS = [
+    "jet.dashboard",
     "jet",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -29,6 +30,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "admin_honeypot",
     "rest_framework",
     "django_countries",
     "phonenumber_field",

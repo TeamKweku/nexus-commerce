@@ -61,6 +61,8 @@ urlpatterns = [
         name="schema-redoc",
     ),
     path("jet/", include("jet.urls", "jet")),
+    path("jet/dashboard/", include("jet.dashboard.urls", "jet-dashboard")),
+    path("admin/", include("admin_honeypot.urls", namespace="admin_honeypot")),
     path(settings.ADMIN_URL, admin.site.urls),
     path("api/v1/auth/", include("djoser.urls")),
     path("api/v1/auth/", include("core_apps.users.urls")),

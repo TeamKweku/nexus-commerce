@@ -13,7 +13,7 @@ discovers tasks from installed applications.
 """
 
 # Set default Django settings module for Celery
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 
 # Initialize Celery application
 app = Celery("nexuscommerce")
