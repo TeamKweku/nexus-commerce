@@ -8,13 +8,16 @@ services:
     volumes:
       - .:/app:z
       - ./staticfiles:/app/staticfiles
-    ports:
-      - "8000:8000"
+    # ports:
+    #   - "8000:8000"
+    expose:
+      - "8000"
     env_file:
       - ./.envs/.env.local
     depends_on:
       - postgres
       - mailpit
+      - redis
     command: /start
     networks:
       - nexuscommerce_nw
@@ -32,8 +35,8 @@ services:
     env_file:
       - ./.envs/.env.local
     networks:
-      - nexuscommerce_nw 
-  
+      - nexuscommerce_nw
+
   mailpit:
     image: docker.io/axllent/mailpit:v1.22
     container_name: nexuscommerce_mailpit
@@ -50,6 +53,51 @@ services:
     networks:
       - nexuscommerce_nw
 
+  redis:
+    image: redis:7.0-alpine3.19
+    command: redis-server --appendonly yes
+    container_name: nexuscommerce_redis
+    volumes:
+      - nexuscommerce_redis_data:/data
+    networks:
+      - nexuscommerce_nw
+
+  celeryworker:
+    <<: *api
+    image: nexuscommerce_celeryworker
+    container_name: nexuscommerce_celeryworker
+    command: /start-celeryworker
+
+  celerybeat:
+    <<: *api
+    image: nexuscommerce_celerybeat
+    container_name: nexuscommerce_celerybeat
+    command: /start-celerybeat
+
+  flower:
+    <<: *api
+    image: nexuscommerce_flower
+    container_name: nexuscommerce_flower
+    ports:
+      - "5555:5555"
+    command: /start-flower
+
+  nginx:
+    build:
+      context: ./docker/local/nginx
+      dockerfile: Dockerfile
+    restart: always
+    container_name: nexuscommerce_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./staticfiles:/app/staticfiles
+      - logs_store:/var/log/nginx
+    depends_on:
+      - api
+    networks:
+      - nexuscommerce_nw
+
 networks:
   nexuscommerce_nw:
     
@@ -57,3 +105,5 @@ networks:
 volumes:
   nexuscommerce_postgres_data: {}
   nexuscommerce_mailpit_data: {}
+  nexuscommerce_redis_data: {}
+  logs_store: {}

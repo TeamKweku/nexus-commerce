@@ -10,13 +10,11 @@ local_env_file = path.join(BASE_DIR, ".envs", ".env.local")
 if path.isfile(local_env_file):
     load_dotenv(local_env_file)
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = getenv(
     "DJANGO_SECRET_KEY",
     "django-insecure-879d!v4_m1p*_hrlg8%oa89ssy!^7)6ov@x74sui6*=ja*8&lx",
 )
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 SITE_NAME = getenv("SITE_NAME")
@@ -36,7 +34,12 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {"format": "%(levelname)s %(name)-12s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"}
+        "verbose": {
+            "format": (
+                "%(levelname)s %(name)-12s %(asctime)s "
+                "%(module)s %(process)d %(thread)d %(message)s"
+            )
+        }
     },
     "handlers": {
         "console": {
