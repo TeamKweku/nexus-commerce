@@ -10,10 +10,13 @@ DATABASES = {
     }
 }
 
-# Define SECRET_KEY for testing (or rely on an environment variable)
-SECRET_KEY = "test-secret-key-12345"  # Hardcode for testing or use getenv
+# Define SECRET_KEY for testing
+SECRET_KEY = "test-secret-key-12345"
 
-# Make tests faster by using simple/minimal password hashing
+# Define ADMIN_URL for testing
+ADMIN_URL = "admin/"
+
+# Make tests faster by using simple password hashing
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
 # Disable Celery in tests

@@ -27,12 +27,3 @@ collectstatic:
 
 superuser:
 	docker compose -f local.yml run --rm api python manage.py createsuperuser
-
-test:
-    DJANGO_SETTINGS_MODULE=config.settings.test pytest
-
-test-cov:
-    DJANGO_SETTINGS_MODULE=config.settings.test pytest --cov=core_apps
-
-test-file:
-    DJANGO_SETTINGS_MODULE=config.settings.test pytest $(file)
